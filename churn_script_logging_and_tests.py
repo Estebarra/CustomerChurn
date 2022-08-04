@@ -1,63 +1,68 @@
+'''
+TO DO
+'''
 import os
 import logging
 import glob
-import sys 
+import sys
 import pytest
 import joblib
 
 import constants
 import churn_library as cl
 
-
+os.environ['QT_QPA_PLATFORM'] = 'offscreen'
 logging.basicConfig(
-    filename='./logs/churn_library.log',
-    level = logging.INFO,
+    filename='./logs/testing_churn_library.log',
+    level=logging.INFO,
     filemode='w',
     format='%(name)s - %(levelname)s - %(message)s')
 
-@pytest.fixture(name='df')
-def test_import(import_data):
+test_model = cl.ChurnModel()
+
+
+def test_import():
     '''
-    test data import - this example is completed for you to assist with the 
+    test data import - this example is completed for you to assist with the
     other test functions
     '''
     try:
-        df = cl.import_data("./data/bank_data.csv")
+        test_df = test_model.import_data("./data/bank_data.csv")
         logging.info("Importing data was succesful!")
     except FileNotFoundError as err:
         logging.error("I found an error, I didn't find the file")
         raise err
     try:
-        assert df.shape[0] > 0
-        assert df.shape[1] > 0
+        assert test_df.shape[0] > 0
+        assert test_df.shape[1] > 0
         logging.info("The imported dataframe has a reasonable shape!")
     except AssertionError as err:
         logging.error("The imported dataframe has a strange shape")
         raise err
 
-    return df
 
-def test_eda(df):
+def test_eda():
     '''
     test perform eda function
     '''
-    cl.perform_eda(df)
+    test_model.perform_eda()
     for image_name in constants.EDA_GRAPHS:
         try:
-            with open("images/eda/%s.png" % image_name, 'r'):
-                logging.info("I found {}!".format(image_name))
+            with open(f"images/eda/{image_name}.png", 'r', encoding='utf-8'):
+                logging.info("I found %s!", image_name)
         except FileNotFoundError as err:
-            logging.error("I did not found {}".format(image_name))
+            logging.error("I did not found %s", image_name)
             raise err
 
-@pytest.fixture(name='df_encoded')
-def test_encoder_helper(df):
+
+def test_encoder_helper():
     '''
     test encoder helper
     '''
     columns = [i + '_' + constants.RESPONSE for i in constants.CAT_COLUMNS]
     try:
-        df_encoded = cl.encoder_helper(df, constants.CAT_COLUMNS)
+        df_encoded = test_model.encoder_helper(constants.CAT_COLUMNS,
+                                               constants.RESPONSE)
         logging.info("Encoded dataframe fixture creation: SUCCESS")
     except KeyError as err:
         logging.error(
@@ -72,17 +77,13 @@ def test_encoder_helper(df):
         raise err
     logging.info("Testing encoder_helper: SUCCESS")
 
-    return df_encoded
 
-@pytest.fixture(name='data')
-def test_perform_feature_engineering(df_encoded):
+def test_perform_feature_engineering():
     '''
     test perform_feature_engineering
     '''
-    data = dict()
     try:
-        x_train, x_test, y_train, y_test = cl.perform_feature_engineering(
-            df_encoded)
+        x_train, x_test, y_train, y_test = test_model.perform_feature_engineering()
 
         logging.info("Feature sequence fixture creation: SUCCESS")
     except BaseException:
@@ -97,23 +98,12 @@ def test_perform_feature_engineering(df_encoded):
         logging.error("Sequences length mismatch")
         raise err
 
-    data["x_train"] = x_train
-    data["x_test"] = x_test
-    data["y_train"] = y_train
-    data["y_test"] = y_test
 
-    return data
-
-
-def test_train_models(data):
+def test_train_models():
     '''
     test train_models
     '''
-    cl.train_models(
-        data["X_train"],
-        data["X_test"],
-        data['y_test'],
-        data['y_train'])
+    test_model.train_models()
     try:
         joblib.load('models/rfc_model.pkl')
         joblib.load('models/logistic_model.pkl')
@@ -122,11 +112,13 @@ def test_train_models(data):
         logging.error("Testing train_models: The files waeren't found")
         raise err
     for image_name in [
-        "Logistic_Regression",
-        "Random_Forest",
-        "Feature_Importance"]:
+        "feature_importances",
+        "logistic_results",
+        "rf_results",
+        "roc_curve_result",
+            "shap_plot"]:
         try:
-            with open("images/results/%s.png" % image_name, 'r'):
+            with open(f"images/results/{image_name}.png", 'r', encoding='utf-8'):
                 logging.info("SUCCESS")
         except FileNotFoundError as err:
             logging.error("generated images missing")
@@ -135,15 +127,7 @@ def test_train_models(data):
 
 if __name__ == "__main__":
     for directory in ["logs", "images/eda", "images/results", "./models"]:
-        files = glob.glob("%s/*" % directory)
+        files = glob.glob(f"{directory}/*")
         for file in files:
             os.remove(file)
     sys.exit(pytest.main(["-s"]))
-
-
-
-
-
-
-
-

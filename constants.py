@@ -25,3 +25,10 @@ EDA_GRAPHS = [
         "marital_status_distribution",
         "total_transaction_distribution",
         "heatmap"]
+
+PARAM_GRID = {
+            'n_estimators': [200, 500],
+            'max_features': ['auto', 'sqrt'],
+            'max_depth': [4, 5, 100],
+            'criterion': ['gini', 'entropy']
+        }

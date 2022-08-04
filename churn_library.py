@@ -3,7 +3,7 @@
 To do
 """
 
-# import libraries
+import logging
 import shap
 import joblib
 import pandas as pd
@@ -11,14 +11,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-from sklearn.preprocessing import normalize
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import plot_roc_curve, classification_report
 
-import logging
 import constants
 
 logging.basicConfig(
@@ -30,15 +28,16 @@ logging.basicConfig(
 sns.set()
 plt.rcParams['figure.figsize'] = 20, 10
 
-def plot_hist(df, column, name):
+
+def plot_hist(churn_df, column, name):
     '''
+    Function
     '''
-    plt.figure() 
-    df[column].hist()
+    plt.figure()
+    churn_df[column].hist()
     plt.savefig('images/eda/' + name)
     plt.clf()
 
-    return None
 
 def classification_report_image(y_train,
                                 y_test,
@@ -47,9 +46,9 @@ def classification_report_image(y_train,
                                 y_test_preds_lr,
                                 y_test_preds_rf):
     '''
-    produces classification report for training and testing results and stores 
+    produces classification report for training and testing results and stores
     report as image in images folder
-    
+
     input:
         y_train: training response values
         y_test:  test response values
@@ -63,25 +62,25 @@ def classification_report_image(y_train,
     logging.info('Initializing classification report creation...')
     plt.rc('figure', figsize=(5, 5))
     plt.text(0.01,
-            1.25,
-            str('Random Forest Train'),
-            {'fontsize': 10},
-            fontproperties = 'monospace')
+             1.25,
+             str('Random Forest Train'),
+             {'fontsize': 10},
+             fontproperties='monospace')
     plt.text(0.01,
-            0.05,
-            str(classification_report(y_test, y_test_preds_rf)),
-            {'fontsize': 10},
-            fontproperties = 'monospace') 
+             0.05,
+             str(classification_report(y_test, y_test_preds_rf)),
+             {'fontsize': 10},
+             fontproperties='monospace')
     plt.text(0.01,
-            0.6,
-            str('Random Forest Test'),
-            {'fontsize': 10},
-            fontproperties = 'monospace')
+             0.6,
+             str('Random Forest Test'),
+             {'fontsize': 10},
+             fontproperties='monospace')
     plt.text(0.01,
-            0.7, 
-            str(classification_report(y_train, y_train_preds_rf)), 
-            {'fontsize': 10}, 
-            fontproperties = 'monospace') 
+             0.7,
+             str(classification_report(y_train, y_train_preds_rf)),
+             {'fontsize': 10},
+             fontproperties='monospace')
     plt.axis('off')
     plt.savefig('images/results/rf_results.png')
     plt.clf()
@@ -89,33 +88,32 @@ def classification_report_image(y_train,
 
     plt.rc('figure', figsize=(5, 5))
     plt.text(0.01,
-            1.25, 
-            str('Logistic Regression Train'), 
-            {'fontsize': 10}, 
-            fontproperties = 'monospace')
-    plt.text(0.01, 
-            0.05, 
-            str(classification_report(y_train, y_train_preds_lr)), 
-            {'fontsize': 10}, 
-            fontproperties = 'monospace')
-    plt.text(0.01, 
-            0.6, 
-            str('Logistic Regression Test'), 
-            {'fontsize': 10}, 
-            fontproperties = 'monospace')
-    plt.text(0.01, 
-            0.7, 
-            str(classification_report(y_test, y_test_preds_lr)), 
-            {'fontsize': 10}, 
-            fontproperties = 'monospace')
+             1.25,
+             str('Logistic Regression Train'),
+             {'fontsize': 10},
+             fontproperties='monospace')
+    plt.text(0.01,
+             0.05,
+             str(classification_report(y_train, y_train_preds_lr)),
+             {'fontsize': 10},
+             fontproperties='monospace')
+    plt.text(0.01,
+             0.6,
+             str('Logistic Regression Test'),
+             {'fontsize': 10},
+             fontproperties='monospace')
+    plt.text(0.01,
+             0.7,
+             str(classification_report(y_test, y_test_preds_lr)),
+             {'fontsize': 10},
+             fontproperties='monospace')
     plt.axis('off')
     plt.savefig('images/results/logistic_results.png')
     plt.clf()
     logging.info('LR report created and stored succesfully')
-    
-    return None
 
-def feature_importance_plot(model, X_data, output_pth):
+
+def feature_importance_plot(model, x_data, output_pth):
     '''
     creates and stores the feature importances in pth
 
@@ -133,36 +131,36 @@ def feature_importance_plot(model, X_data, output_pth):
     indices = np.argsort(importances)[::-1]
 
     # Rearrange feature names so they match the sorted feature importances
-    names = [X_data.columns[i] for i in indices]
+    names = [x_data.columns[i] for i in indices]
 
     # Create plot
-    plt.figure(figsize=(20,5))
+    plt.figure(figsize=(20, 5))
 
     # Create plot title
     plt.title('Feature Importance')
     plt.ylabel('Importance')
 
     # Add bars
-    plt.bar(range(X_data.shape[1]), importances[indices])
+    plt.bar(range(x_data.shape[1]), importances[indices])
 
     # Add feature names as x-axis labels
-    plt.xticks(range(X_data.shape[1]), names, rotation=90)
+    plt.xticks(range(x_data.shape[1]), names, rotation=90)
 
     plt.savefig(output_pth + 'feature_importances.png')
     plt.clf()
     logging.info('Feature importance plot created and stored succesfully')
 
 
-    return None
-
 class ChurnModel:
     '''
+    Class
     '''
+
     def __init__(self):
-        self.df = None
-        self.X_train = None
-        self.X_test = None
-        self.y_text = None
+        self.churn_df = None
+        self.x_train = None
+        self.x_test = None
+        self.y_test = None
         self.y_train = None
 
     def import_data(self, pth):
@@ -173,23 +171,22 @@ class ChurnModel:
             pth: a path to the csv
         output:
             df: pandas dataframe
-        '''	
+        '''
         logging.info('Importing data...')
         try:
-            self.df = pd.read_csv(pth)
+            self.churn_df = pd.read_csv(pth)
 
-            self.df['Churn'] = self.df['Attrition_Flag']\
+            self.churn_df['Churn'] = self.churn_df['Attrition_Flag']\
                 .apply(lambda val: 0 if val == "Existing Customer" else 1)
 
             logging.info('Data imported succesfully')
 
-            logging.info('The file has a shape of: {}'.format(self.df.shape))
+            logging.info('Data has a shape of: %s', self.churn_df.shape)
 
-            return self.df
+            return self.churn_df
 
         except FileNotFoundError:
             logging.error('The file was not available')
-
 
     def perform_eda(self):
         '''
@@ -201,34 +198,42 @@ class ChurnModel:
             None
         '''
         logging.info('Initializing EDA')
-        plot_hist(self.df, 'Churn', 'churn_distribution.png')
+        plot_hist(self.churn_df,
+                  'Churn',
+                  'churn_distribution.png')
         logging.info('Churn distribution plot created and stored succesfully')
-        plot_hist(self.df, 'Customer_Age', 'customer_age_distribution.png')
-        logging.info('Customer Age distribution plot created and stored succesfully')
-        plt.figure() 
-        self.df.Marital_Status.value_counts('normalize').plot(kind='bar')
+        plot_hist(self.churn_df,
+                  'Customer_Age',
+                  'customer_age_distribution.png')
+        logging.info(
+            'Customer Age distribution plot created and stored succesfully')
+        plt.figure()
+        self.churn_df.Marital_Status.value_counts('normalize').plot(kind='bar')
         plt.savefig('images/eda/marital_status_distribution.png')
         plt.clf()
-        logging.info('Marital Status distribution plot created and stored succesfully')
+        logging.info(
+            'Marital Status distribution plot created and stored succesfully')
 
-        plt.figure() 
-        sns.distplot(self.df['Total_Trans_Ct'])
+        plt.figure()
+        sns.distplot(self.churn_df['Total_Trans_Ct'])
         plt.savefig('images/eda/total_transaction_distribution.png')
         plt.clf()
-        logging.info('Total Transaction distribution plot created and stored succesfully')
+        logging.info(
+            'Total Transaction distribution plot created and stored succesfully')
 
-        plt.figure() 
-        sns.heatmap(self.df.corr(), annot=False, cmap='Dark2_r', linewidths = 2)
+        plt.figure()
+        sns.heatmap(self.churn_df.corr(),
+                    annot=False,
+                    cmap='Dark2_r',
+                    linewidths=2)
         plt.savefig('images/eda/heatmap.png')
         plt.clf()
         logging.info('Heatmap created and stored succesfully')
 
-        return None
-
     def encoder_helper(self, category_lst, response):
         '''
         helper function to turn each categorical column into a new column with
-        propotion of churn for each category - associated with cell 15 from the 
+        propotion of churn for each category - associated with cell 15 from the
         notebook
 
         input:
@@ -242,18 +247,17 @@ class ChurnModel:
         logging.info('Initializing Encoder Helper')
         for i in category_lst:
             cat_lst = []
-            cat_groups = self.df.groupby(i).mean()['Churn']
+            cat_groups = self.churn_df.groupby(i).mean()['Churn']
 
-            for val in self.df[i]:
-                cat_lst.append(cat_groups.loc[val]) 
+            for val in self.churn_df[i]:
+                cat_lst.append(cat_groups.loc[val])
 
-            self.df[i+'_'+ response] = cat_lst
+            self.churn_df[i + '_' + response] = cat_lst
 
         logging.info('Encoder Helper executed succesfully')
-        logging.info('Dataframe has a new shape of: {}'.format(self.df.shape))
+        logging.info('Dataframe has a new shape of: %s', self.churn_df.shape)
 
-        return self.df
-
+        return self.churn_df
 
     def perform_feature_engineering(self):
         '''
@@ -268,28 +272,28 @@ class ChurnModel:
             y_test: y testing data
         '''
         logging.info('Initializing Feature Engineering')
-        X = pd.DataFrame()
-        X[constants.KEEP_COLS] = self.df[constants.KEEP_COLS]
+        features = pd.DataFrame()
+        features[constants.KEEP_COLS] = self.churn_df[constants.KEEP_COLS]
 
-        y = self.df['Churn']
+        labels = self.churn_df['Churn']
 
-        self.X_train, self.X_test, self.y_train, self.y_test =\
-             train_test_split(X,
-                            y,
-                            test_size= 0.3, 
-                            random_state=42)
+        self.x_train, self.x_test, self.y_train, self.y_test =\
+            train_test_split(features,
+                             labels,
+                             test_size=0.3,
+                             random_state=42)
         logging.info("Feature Engineering executed succesfully")
-        logging.info("X_train has a shape of: {}".format(self.X_train.shape))
-        logging.info("X_test has a shape of: {}".format(self.X_test.shape))
-        logging.info("y_train has a shape of: {}".format(self.y_train.shape))
-        logging.info("y_test has a shape of: {}".format(self.y_test.shape))
+        logging.info("X_train has a shape of: %s", self.x_train.shape)
+        logging.info("X_test has a shape of: %s", self.x_test.shape)
+        logging.info("y_train has a shape of: %s", self.y_train.shape)
+        logging.info("y_test has a shape of: %s", self.y_test.shape)
 
-        return self.X_train, self.X_test, self.y_train, self.y_test
+        return self.x_train, self.x_test, self.y_train, self.y_test
 
     def train_models(self):
         '''
         train, store model results: images + scores, and store models
-            
+
         input:
             X_train: X training data
             X_test: X testing data
@@ -302,23 +306,18 @@ class ChurnModel:
         rfc = RandomForestClassifier(random_state=42)
         lrc = LogisticRegression()
 
-        param_grid = { 
-            'n_estimators': [200, 500],
-            'max_features': ['auto', 'sqrt'],
-            'max_depth' : [4,5,100],
-            'criterion' :['gini', 'entropy']
-        }   
+        cv_rfc = GridSearchCV(estimator=rfc,
+                              param_grid=constants.PARAM_GRID,
+                              cv=5)
+        cv_rfc.fit(self.x_train, self.y_train)
 
-        cv_rfc = GridSearchCV(estimator=rfc, param_grid=param_grid, cv=5)
-        cv_rfc.fit(self.X_train, self.y_train)
+        lrc.fit(self.x_train, self.y_train)
 
-        lrc.fit(self.X_train, self.y_train)
+        y_train_preds_rf = cv_rfc.best_estimator_.predict(self.x_train)
+        y_test_preds_rf = cv_rfc.best_estimator_.predict(self.x_test)
 
-        y_train_preds_rf = cv_rfc.best_estimator_.predict(self.X_train)
-        y_test_preds_rf = cv_rfc.best_estimator_.predict(self.X_test)
-
-        y_train_preds_lr = lrc.predict(self.X_train)
-        y_test_preds_lr = lrc.predict(self.X_test)
+        y_train_preds_lr = lrc.predict(self.x_train)
+        y_test_preds_lr = lrc.predict(self.x_test)
 
         # Save best models
         joblib.dump(cv_rfc.best_estimator_, './models/rfc_model.pkl')
@@ -339,32 +338,31 @@ class ChurnModel:
                                     y_test_preds_lr,
                                     y_test_preds_rf)
 
-        X_data = pd.concat([self.X_test, self.X_train], ignore_index=True)
+        x_data = pd.concat([self.x_test, self.x_train], ignore_index=True)
 
-        feature_importance_plot(rfc_model, X_data, './images/results/')
+        feature_importance_plot(rfc_model, x_data, './images/results/')
 
         # Plot and save ROC Curve
-        lrc_plot = plot_roc_curve(lr_model, self.X_test, self.y_test)
+        lrc_plot = plot_roc_curve(lr_model, self.x_test, self.y_test)
         plt.figure(figsize=(15, 8))
-        ax = plt.gca()
-        rfc_disp = plot_roc_curve(rfc_model,
-                                self.X_test, 
-                                self.y_test, 
-                                ax=ax, 
-                                alpha=0.8)
-        lrc_plot.plot(ax=ax, alpha=0.8)
+        axes = plt.gca()
+        _ = plot_roc_curve(rfc_model,
+                           self.x_test,
+                           self.y_test,
+                           ax=axes,
+                           alpha=0.8)
+        lrc_plot.plot(ax=axes, alpha=0.8)
         plt.savefig('./images/results/roc_curve_result.png')
         plt.clf()
         logging.info('ROC curve plot has been succesfully created and stored')
 
         explainer = shap.TreeExplainer(rfc_model)
-        shap_values = explainer.shap_values(self.X_test)
-        shap.summary_plot(shap_values, self.X_test, plot_type="bar")
+        shap_values = explainer.shap_values(self.x_test)
+        shap.summary_plot(shap_values, self.x_test, plot_type="bar")
         plt.savefig('./images/results/shap_plot.png')
         plt.clf()
         logging.info('SHAP plot has been succesfully created and stored')
 
-        return None
 
 if __name__ == "__main__":
 
@@ -387,5 +385,3 @@ if __name__ == "__main__":
     # model object was saved with .pkl extension in models folder
     # model evaluation result was saved in images/results
     MODEL_INS.train_models()
-
-

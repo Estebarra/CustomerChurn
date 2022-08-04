@@ -1,0 +1,30 @@
+root - INFO - Importing data...
+root - INFO - Data imported succesfully
+root - INFO - Data has a shape of: (10127, 23)
+root - INFO - Initializing EDA
+root - INFO - Churn distribution plot created and stored succesfully
+root - INFO - Customer Age distribution plot created and stored succesfully
+root - INFO - Marital Status distribution plot created and stored succesfully
+root - INFO - Total Transaction distribution plot created and stored succesfully
+root - INFO - Heatmap created and stored succesfully
+root - INFO - Initializing Encoder Helper
+root - INFO - Encoder Helper executed succesfully
+root - INFO - Dataframe has a new shape of: (10127, 28)
+root - INFO - Initializing Feature Engineering
+root - INFO - Feature Engineering executed succesfully
+root - INFO - X_train has a shape of: (7088, 19)
+root - INFO - X_test has a shape of: (3039, 19)
+root - INFO - y_train has a shape of: (7088,)
+root - INFO - y_test has a shape of: (3039,)
+root - INFO - Initializing Training
+root - INFO - RF Model has been succesfully stored
+root - INFO - LR Model has been succesfully stored
+root - INFO - RF Model has been succesfully loaded
+root - INFO - LR Model has been succesfully loaded
+root - INFO - Initializing classification report creation...
+root - INFO - RF report created and stored succesfully
+root - INFO - LR report created and stored succesfully
+root - INFO - Initializing feature importance plot creation
+root - INFO - Feature importance plot created and stored succesfully
+root - INFO - ROC curve plot has been succesfully created and stored
+root - INFO - SHAP plot has been succesfully created and stored
