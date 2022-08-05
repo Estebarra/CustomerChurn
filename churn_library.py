@@ -1,21 +1,24 @@
-# library doc string
 """
-To do
+This library contains the workflow used to train churn prediction models.
+Author: Luis Barranco
+Date: August 05, 2022
 """
 
+import warnings
 import logging
+
+from sklearn.metrics import plot_roc_curve, classification_report
+from sklearn.model_selection import GridSearchCV
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
 import shap
 import joblib
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
-
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.model_selection import GridSearchCV
-from sklearn.metrics import plot_roc_curve, classification_report
+warnings.filterwarnings("ignore")
 
 import constants
 
@@ -31,7 +34,15 @@ plt.rcParams['figure.figsize'] = 20, 10
 
 def plot_hist(churn_df, column, name):
     '''
-    Function
+    Generates a histogram of the selected column and stores it as a png in the
+    eda folder.
+
+    input:
+        y_train: churn_df
+        column: data to be plotted as a histogram
+        name: png file name
+    output:
+        None
     '''
     plt.figure()
     churn_df[column].hist()
@@ -46,7 +57,7 @@ def classification_report_image(y_train,
                                 y_test_preds_lr,
                                 y_test_preds_rf):
     '''
-    produces classification report for training and testing results and stores
+    Produces classification report for training and testing results and stores
     report as image in images folder
 
     input:
@@ -115,7 +126,7 @@ def classification_report_image(y_train,
 
 def feature_importance_plot(model, x_data, output_pth):
     '''
-    creates and stores the feature importances in pth
+    Creates and stores the feature importances in pth
 
     input:
         model: model object containing feature_importances_
@@ -153,7 +164,8 @@ def feature_importance_plot(model, x_data, output_pth):
 
 class ChurnModel:
     '''
-    Class
+    Class designed to execute as a workflow all the operations required to
+    model data and train a ML algorithm to predict customer churn.
     '''
 
     def __init__(self):
@@ -165,12 +177,13 @@ class ChurnModel:
 
     def import_data(self, pth):
         '''
-        returns dataframe for the csv found at pth
+        Returns dataframe for the csv found at pth
 
         input:
+            self: class parameters
             pth: a path to the csv
         output:
-            df: pandas dataframe
+            churn_df: pandas dataframe
         '''
         logging.info('Importing data...')
         try:
@@ -190,10 +203,10 @@ class ChurnModel:
 
     def perform_eda(self):
         '''
-        perform eda on df and save figures to images folder
+        Perform eda on df and save figures to images folder
 
         input:
-            df: pandas dataframe
+            self: class parameters
         output:
             None
         '''
@@ -232,17 +245,17 @@ class ChurnModel:
 
     def encoder_helper(self, category_lst, response):
         '''
-        helper function to turn each categorical column into a new column with
+        Helper function to turn each categorical column into a new column with
         propotion of churn for each category - associated with cell 15 from the
         notebook
 
         input:
-            df: pandas dataframe
+            self: class parameters
             category_lst: list of columns that contain categorical features
             response: string of response name [optional argument that could be
                 used for naming variables or index y column]
         output:
-            df: pandas dataframe with new columns for
+            churn_df: pandas dataframe with new columns for
         '''
         logging.info('Initializing Encoder Helper')
         for i in category_lst:
@@ -262,12 +275,10 @@ class ChurnModel:
     def perform_feature_engineering(self):
         '''
         input:
-            df: pandas dataframe
-            response: string of response name [optional argument that could be
-            used for naming variables or index y column]
+            self: class parameters
         output:
-            X_train: X training data
-            X_test: X testing data
+            x_train: X training data
+            x_test: X testing data
             y_train: y training data
             y_test: y testing data
         '''
@@ -282,11 +293,11 @@ class ChurnModel:
                              labels,
                              test_size=0.3,
                              random_state=42)
-        logging.info("Feature Engineering executed succesfully")
-        logging.info("X_train has a shape of: %s", self.x_train.shape)
-        logging.info("X_test has a shape of: %s", self.x_test.shape)
-        logging.info("y_train has a shape of: %s", self.y_train.shape)
-        logging.info("y_test has a shape of: %s", self.y_test.shape)
+        logging.info('Feature Engineering executed succesfully')
+        logging.info('X_train has a shape of: %s', self.x_train.shape)
+        logging.info('X_test has a shape of: %s', self.x_test.shape)
+        logging.info('y_train has a shape of: %s', self.y_train.shape)
+        logging.info('y_test has a shape of: %s', self.y_test.shape)
 
         return self.x_train, self.x_test, self.y_train, self.y_test
 
@@ -295,10 +306,7 @@ class ChurnModel:
         train, store model results: images + scores, and store models
 
         input:
-            X_train: X training data
-            X_test: X testing data
-            y_train: y training data
-            y_test: y testing data
+            self: class parameters
         output:
             None
         '''
@@ -364,24 +372,22 @@ class ChurnModel:
         logging.info('SHAP plot has been succesfully created and stored')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
 
     # model object initiation
-    MODEL_INS = ChurnModel()
+    model_instance = ChurnModel()
 
     # read the data
-    MODEL_INS.import_data(constants.DATA_PATH)
+    model_instance.import_data(constants.DATA_PATH)
 
-    # create eda plot and save the result in images/eda
-    MODEL_INS.perform_eda()
+    # create eda plot and store the result in images/eda
+    model_instance.perform_eda()
 
-    # encoding categorical feature
-    MODEL_INS.encoder_helper(constants.CAT_COLUMNS, constants.RESPONSE)
+    # encoding features
+    model_instance.encoder_helper(constants.CAT_COLUMNS, constants.RESPONSE)
 
-    # feature engineering (standardization and data splitting)
-    MODEL_INS.perform_feature_engineering()
+    # feature engineering
+    model_instance.perform_feature_engineering()
 
     # model training and evaluation
-    # model object was saved with .pkl extension in models folder
-    # model evaluation result was saved in images/results
-    MODEL_INS.train_models()
+    model_instance.train_models()

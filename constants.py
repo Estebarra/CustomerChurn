@@ -1,5 +1,8 @@
-'''
-'''
+"""
+This file contains constants of interest used during the workflow execution
+Author: Luis Barranco
+Date: August 05, 2022
+"""
 
 KEEP_COLS = ['Customer_Age', 'Dependent_count', 'Months_on_book',
             'Total_Relationship_Count', 'Months_Inactive_12_mon',

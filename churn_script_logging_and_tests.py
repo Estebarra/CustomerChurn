@@ -1,6 +1,9 @@
-'''
-TO DO
-'''
+"""
+This file contains the tests used to check the workflow functionality
+Author: Luis Barranco
+Date: August 05, 2022
+"""
+
 import os
 import logging
 import glob
@@ -27,17 +30,17 @@ def test_import():
     other test functions
     '''
     try:
-        test_df = test_model.import_data("./data/bank_data.csv")
-        logging.info("Importing data was succesful!")
+        test_df = test_model.import_data('./data/bank_data.csv')
+        logging.info('TESTING: Importing data was succesful!')
     except FileNotFoundError as err:
-        logging.error("I found an error, I didn't find the file")
+        logging.error('TESTING: I found an error, I did not find the file')
         raise err
     try:
         assert test_df.shape[0] > 0
         assert test_df.shape[1] > 0
-        logging.info("The imported dataframe has a reasonable shape!")
+        logging.info('TESTING: The imported dataframe has a reasonable shape!')
     except AssertionError as err:
-        logging.error("The imported dataframe has a strange shape")
+        logging.error('TESTING: The imported dataframe has a strange shape')
         raise err
 
 
@@ -48,10 +51,10 @@ def test_eda():
     test_model.perform_eda()
     for image_name in constants.EDA_GRAPHS:
         try:
-            with open(f"images/eda/{image_name}.png", 'r', encoding='utf-8'):
-                logging.info("I found %s!", image_name)
+            with open(f'images/eda/{image_name}.png', 'r', encoding='utf-8'):
+                logging.info('TESTING: I found %s!', image_name)
         except FileNotFoundError as err:
-            logging.error("I did not found %s", image_name)
+            logging.error('TESTING: I did not found %s', image_name)
             raise err
 
 
@@ -63,19 +66,19 @@ def test_encoder_helper():
     try:
         df_encoded = test_model.encoder_helper(constants.CAT_COLUMNS,
                                                constants.RESPONSE)
-        logging.info("Encoded dataframe fixture creation: SUCCESS")
+        logging.info('TESTING: Encoded dataframe created!')
     except KeyError as err:
         logging.error(
-            " Not existent column to encode")
+            'TESTING: Not existent column to encode')
         raise err
     try:
         for column in columns:
             assert column in df_encoded
+        logging.info('TESTING: The dataframe has the right encoded columns!')
     except AssertionError as err:
         logging.error(
-            "The dataframe doesn't have the right encoded columns")
+            'TESTING: The dataframe does not have the right encoded columns')
         raise err
-    logging.info("Testing encoder_helper: SUCCESS")
 
 
 def test_perform_feature_engineering():
@@ -85,17 +88,18 @@ def test_perform_feature_engineering():
     try:
         x_train, x_test, y_train, y_test = test_model.perform_feature_engineering()
 
-        logging.info("Feature sequence fixture creation: SUCCESS")
+        logging.info('TESTING: Training and testing sets created!')
     except BaseException:
         logging.error(
-            "Feature sequences fixture creation: Sequences length mismatch")
+            'TESTING: Training and testing sets were not created')
         raise
     try:
         assert len(x_train) == len(y_train)
         assert len(x_test) == len(y_test)
-        logging.info("Testing feature_engineering: SUCCESS")
+        logging.info(
+            'TESTING: Test and training sets have the correct dimensions!')
     except AssertionError as err:
-        logging.error("Sequences length mismatch")
+        logging.error('TESTING: Test and training sets length mismatch')
         raise err
 
 
@@ -107,27 +111,27 @@ def test_train_models():
     try:
         joblib.load('models/rfc_model.pkl')
         joblib.load('models/logistic_model.pkl')
-        logging.info("Testing testing_models: SUCCESS")
+        logging.info('TESTING: Models Trained!')
     except FileNotFoundError as err:
-        logging.error("Testing train_models: The files waeren't found")
+        logging.error('TESTING: The models files were not found')
         raise err
     for image_name in [
-        "feature_importances",
-        "logistic_results",
-        "rf_results",
-        "roc_curve_result",
-            "shap_plot"]:
+        'feature_importances',
+        'logistic_results',
+        'rf_results',
+        'roc_curve_result',
+            'shap_plot']:
         try:
-            with open(f"images/results/{image_name}.png", 'r', encoding='utf-8'):
-                logging.info("SUCCESS")
+            with open(f'images/results/{image_name}.png', 'r', encoding='utf-8'):
+                logging.info('TESTING: Image found!')
         except FileNotFoundError as err:
-            logging.error("generated images missing")
+            logging.error('TESTING: Generated images missing')
             raise err
 
 
-if __name__ == "__main__":
-    for directory in ["logs", "images/eda", "images/results", "./models"]:
-        files = glob.glob(f"{directory}/*")
+if __name__ == '__main__':
+    for directory in ['logs', 'images/eda', 'images/results', './models']:
+        files = glob.glob(f'{directory}/*')
         for file in files:
             os.remove(file)
-    sys.exit(pytest.main(["-s"]))
+    sys.exit(pytest.main(['-s']))
