@@ -16,7 +16,7 @@ import churn_library as cl
 
 os.environ['QT_QPA_PLATFORM'] = 'offscreen'
 logging.basicConfig(
-    filename='./logs/testing_churn_library.log',
+    filename='./logs/churn_library.log',
     level=logging.INFO,
     filemode='w',
     format='%(name)s - %(levelname)s - %(message)s')
